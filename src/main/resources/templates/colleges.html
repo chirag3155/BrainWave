@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Colleges</title>
+</head>
+<body>
+    <h1>Chat Rooms</h1>
+	<a th:href="@{/logout}">Logout</a>
+	<a th:href="@{/auth/signup}">SignUp</a>
+	  <div th:if="${response != null}">
+        <p> Message: <span th:text="${response.getBody()}"></span></p>
+    </div>
+    <!-- List of chat rooms -->
+    <ul>
+        <li th:each="college : ${colleges}">
+            <!-- Room details -->
+            <img th:src="${college.college_image}" alt="Chat Room Image" width="100" height="100">
+            <span th:text="${college.college_name}"></span> - </span>
+             <span th:text="${college.affiliation}"></span> - </span>
+            <a th:href="@{'/chatroom/join/' + ${chatroom.roomId}}">Join Room</a>
+            <a th:href="@{'/chatroom/delete/' + ${chatroom.roomId}}">Delete Room</a>
+        </li>
+    </ul>
+    <!-- Link to create a new chat room -->
+    <a href="/chatroom/create-room">Create Room</a>
+</body>
+</html>

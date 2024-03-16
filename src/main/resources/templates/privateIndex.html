@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" th:href="@{/styles/style.css}">
+    <script type="text/javascript" src="@{/js/script.js}"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.js"></script>
+    <title>Chat Rooms</title>
+    <style>
+        /* Custom CSS styles */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+
+        img {
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        a {
+            color: #007bff;
+            text-decoration: none;
+            margin-left: 10px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #logout-btn {
+            float: right;
+            margin-top: -25px;
+        }
+
+        #signup-btn {
+            float: right;
+            margin-top: -25px;
+            margin-right: 10px;
+        }
+
+        .message-box {
+            background-color: #f0f0f0;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .message-text {
+            font-style: italic;
+            color: #333;
+        }
+
+        .create-room-btn {
+            display: block;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+	<nav>
+		<div class="logo"><img src="img/icon/logo.png" alt="logo"></div>
+			<ul>
+				<li><a class="active" th:href="@{/}">public</a></li>
+				<li><a th:href="@{/private}">private</a></li>
+				<li><a th:href="@{/colleges}">Colleges</a></li>
+				
+			</ul>
+			<div class="srch"><input type="text" class="search" placeholder="Search here..."><img src="img/icon/search.png" alt="search" onclick=slide()></div>
+			<a class="get-started"  th:href="@{/auth/signup}">SignUp</a>
+			
+		</nav>
+    <h1>Chat Rooms</h1>
+    <a id="logout-btn" th:href="@{/logout}">Logout</a>
+    <a id="signup-btn" th:href="@{/auth/signup}">SignUp</a>
+
+    <!-- Display response message -->
+    <div class="message-box" th:if="${response != null}">
+        <p class="message-text">Message: <span th:text="${response.getBody()}"></span></p>
+    </div>
+
+    <!-- List of chat rooms -->
+    <ul>
+        <li th:each="chatroom : ${chatRooms}">
+            <!-- Room details -->
+            <img th:src="${chatroom.chat_image}" alt="Chat Room Image" width="100" height="100">
+            <span th:text="${chatroom.chat_name}"></span> - 
+            <a th:href="@{'/chatroom/join/' + ${chatroom.roomId}}">Join Room</a>
+            <a th:href="@{'/chatroom/delete/' + ${chatroom.roomId}}">Delete Room</a>
+        </li>
+    </ul>
+
+    <!-- Link to create a new chat room -->
+    <a class="create-room-btn" href="/chatroom/create-room">Create Room</a>
+</body>
+</html>

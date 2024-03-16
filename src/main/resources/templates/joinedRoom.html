@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Room</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' th:href='@{/styles/main.css}'>
+    <link rel='stylesheet' type='text/css' media='screen' th:href='@{/styles/room.css}'>
+    <!-- Include SockJS library -->
+<!-- Include SockJS library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<!-- Include Stomp library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+</head>
+<body>
+
+<header id="nav">
+    <div class="nav--list">
+        <button id="members__button">
+            <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd">
+                <path d="M24 18v1h-24v-1h24zm0-6v1h-24v-1h24zm0-6v1h-24v-1h24z" fill="#ede0e0">
+                    <path d="M24 19h-24v-1h24v1zm0-6h-24v-1h24v1zm0-6h-24v-1h24v1z"/>
+                </path>
+            </svg>
+        </button>
+        <a th:href="@{/lobby}">
+            <h3 id="logo">
+                <h1 th:text="'Chat Room -' + ${chat_name}"></h1>
+                <input type="hidden" id="roomId" th:value="${roomId}">
+            </h3>
+        </a>
+    </div>
+
+    <div id="nav__links">
+        <button id="chat__button">
+            <svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" fill="#ede0e0"
+                 clip-rule="evenodd">
+                <path
+                    d="M24 20h-3v4l-5.333-4h-7.667v-4h2v2h6.333l2.667 2v-2h3v-8.001h-2v-2h4v12.001zm-15.667-6l-5.333 4v-4h-3v-14.001l18 .001v14h-9.667zm-6.333-2h3v2l2.667-2h8.333v-10l-14-.001v10.001z"/>
+            </svg>
+        </button>
+    </div>
+</header>
+
+<main class="container">
+    <div id="room__container">
+
+        <section id="members__container">
+
+            <div id="members__header">
+                <p>Participants</p>
+            </div>
+
+            <div id="member__list">
+            </div>
+
+        </section>
+        
+        
+        <section id="messages__container">
+            
+            <form id="chatForm" th:action="@{'/chatroom/' + ${roomId} + '/sendMessage'}" th:object="${messageDTO}"
+              method="post">
+            <input type="text" id="messageInput" th:field="*{content}" placeholder="Type your message...">
+            <button type="submit">Send</button>
+        </form>
+        <div id="chatMessages">
+                <!-- Messages will be displayed here -->
+                <div th:each="msg : ${messages}">
+                    <p th:text="${msg.content}"></p>
+                </div>
+            </div>
+        </section>
+    </div>
+</main>
+
+</body>
+<script>
+    var roomId = document.getElementById('roomId').value;
+    console.log("Room ID: " + roomId);
+    var stompClient = null;
+
+    function connect(roomId) {
+        var socket = new SockJS('/ws-chat');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            console.log("ho gya connect");
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/chatroom/' + roomId, function (message) {
+                console.log("dikh jaa bhaii")
+                showMessage(JSON.parse(message.body).content);
+            });
+        });
+    }
+
+    function sendMessage(roomId, message) {
+        console.log("bej diya message");
+        stompClient.send('/app/chatroom/' + roomId + '/sendMessage', {}, JSON.stringify({
+            sender: 'user', // You can customize sender logic
+            content: message
+        }));
+    }
+
+    function showMessage(message) {
+        // Create a new message element
+        var messageElement = document.createElement('div');
+        messageElement.textContent = message;
+        console.log("dikh gyaaaaaaaaaaa");
+
+        // Append the new message directly to the HTML container
+        document.getElementById('chatMessages').appendChild(messageElement);
+
+        // If you want to scroll to the bottom of the container, uncomment the following line
+        // document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    }
+
+    document.getElementById('chatForm').addEventListener('submit', function (event) {
+        console.log("Hum FIRST00");
+        event.preventDefault();
+        var messageInput = document.getElementById('messageInput');
+        var message = messageInput.value.trim();
+        if (message !== '') {
+            sendMessage(roomId, message);
+            messageInput.value = '';
+        }
+    });
+
+    connect(roomId); // Connect to the WebSocket
+</script>
+
+</html>
